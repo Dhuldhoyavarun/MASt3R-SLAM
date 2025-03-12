@@ -6,4 +6,4 @@
 	url = https://github.com/pyimgui/pyimgui.git
 [submodule "lietorch"]
 	path = lietorch
-	url = C:\\Users\\vdhuldhoya\\wsl_version\\MASt3R-SLAM/lietorch
+	url = https://github.com/Dhuldhoyavarun/lietorch.git
