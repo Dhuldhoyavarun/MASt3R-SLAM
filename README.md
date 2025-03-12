@@ -66,12 +66,7 @@ wget https://download.europe.naverlabs.com/ComputerVision/MASt3R/MASt3R_ViTLarge
 wget https://download.europe.naverlabs.com/ComputerVision/MASt3R/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric_retrieval_codebook.pkl -P checkpoints/
 ```
 
-## WSL Users
-We have primarily tested on Ubuntu.  If you are using WSL, please checkout to the windows branch and follow the above installation.
-```
-git checkout windows
-```
-This disables multiprocessing which causes an issue with shared memory as discussed [here](https://github.com/rmurai0610/MASt3R-SLAM/issues/21).
+
 
 ## Examples
 ```
