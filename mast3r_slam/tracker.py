@@ -228,7 +228,7 @@ class FrameTracker:
 
         # Assign new pose based on relative pose
         T_WCf = T_WCk * T_CkCf
-        print("new_pose")
+        #print("new_pose")
 
         return T_WCf, T_CkCf
 

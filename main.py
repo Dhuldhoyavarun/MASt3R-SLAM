@@ -252,13 +252,13 @@ if __name__ == "__main__":
             else states.get_frame().T_WC
         )
         frame = create_frame(i, img, T_WC, img_size=dataset.img_size, device=device)
-        print("------------Mode-----",mode)
-        print("--------framed created------------")
+        #print("------------Mode-----",mode)
+        #print("--------framed created------------")
 
         if mode == Mode.INIT:
             # Initialize via mono inference, and encoded features neeed for database
             X_init, C_init = mast3r_inference_mono(model, frame)
-            print("-------debug mode : INIT-------")
+            print("-------mode : INIT-------")
             frame.update_pointmap(X_init, C_init)
             keyframes.append(frame)
             states.queue_global_optimization(len(keyframes) - 1)
@@ -269,7 +269,7 @@ if __name__ == "__main__":
             continue
 
         if mode == Mode.TRACKING:
-            print("-------debug mode : TRACKING-------")
+            print("-------mode : TRACKING-------")
             add_new_kf, match_info, try_reloc = tracker.track(frame)
             #print("-------debug mode : TRACKING-------")
             #print(add_new_kf,match_info,try_reloc)
@@ -279,7 +279,7 @@ if __name__ == "__main__":
 
         elif mode == Mode.RELOC:
             X, C = mast3r_inference_mono(model, frame)
-            print("----------reloc---------------")
+            print("----------mode : RELOC---------------")
             frame.update_pointmap(X, C)
             states.set_frame(frame)
             states.queue_reloc()
