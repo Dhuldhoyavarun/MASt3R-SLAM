@@ -245,7 +245,9 @@ class MP4Dataset(MonocularDataset):
             self.cap = cv2.VideoCapture(str(self.dataset_path))
             self.fps = self.cap.get(cv2.CAP_PROP_FPS)
             self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
             print("total_frame=",self.total_frames)
+
 
         self.stride = config["dataset"]["subsample"]
 

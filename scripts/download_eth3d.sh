@@ -1,5 +1,5 @@
 #!/bin/bash
-dest="datasets/eth3d/train2"
+dest="datasets/eth3d/train"
 mkdir -p "$dest"
 
 sequences=(
