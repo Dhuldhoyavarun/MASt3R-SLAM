@@ -54,7 +54,7 @@ pip install -e lietorch
 pip install --no-build-isolation -e .
  
 
-# Optionally install torchcodec for faster mp4 loading
+# Optionally install torchcodec for faster mp4 loading (Only Linux or WSL)
 pip install torchcodec==0.1
 ```
 
