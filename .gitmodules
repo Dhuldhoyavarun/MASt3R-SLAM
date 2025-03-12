@@ -4,3 +4,6 @@
 [submodule "thirdparty/in3d/thirdparty/pyimgui"]
 	path = thirdparty/in3d/thirdparty/pyimgui
 	url = https://github.com/pyimgui/pyimgui.git
+[submodule "lietorch"]
+	path = lietorch
+	url = C:\\Users\\vdhuldhoya\\wsl_version\\MASt3R-SLAM/lietorch
