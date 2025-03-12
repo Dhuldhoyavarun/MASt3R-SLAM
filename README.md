@@ -21,6 +21,7 @@
 <br>
 
 # Getting Started
+This is a windows implemetation of rmurai0610/MASt3R-SLAM
 ## Installation
 ```
 conda create -n mast3r-slam python=3.11
