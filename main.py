@@ -172,7 +172,7 @@ if __name__ == "__main__":
             intrinsics["calibration"],
         )
 
-    keyframes = SharedKeyframes(manager, h, w)
+    keyframes = SharedKeyframes(manager, h, w,64)
     states = SharedStates(manager, h, w)
 
     if not args.no_viz:
@@ -223,6 +223,7 @@ if __name__ == "__main__":
         mode = states.get_mode()
         msg = try_get_msg(viz2main)
         last_msg = msg if msg is not None else last_msg
+        #print("--------------message---------",last_msg)
         if last_msg.is_terminated:
             states.set_mode(Mode.TERMINATED)
             break
@@ -236,6 +237,7 @@ if __name__ == "__main__":
             states.unpause()
 
         if i == len(dataset):
+           # print("----true----")
             states.set_mode(Mode.TERMINATED)
             break
 
@@ -250,26 +252,34 @@ if __name__ == "__main__":
             else states.get_frame().T_WC
         )
         frame = create_frame(i, img, T_WC, img_size=dataset.img_size, device=device)
+        print("------------Mode-----",mode)
+        print("--------framed created------------")
 
         if mode == Mode.INIT:
             # Initialize via mono inference, and encoded features neeed for database
             X_init, C_init = mast3r_inference_mono(model, frame)
+            print("-------debug mode : INIT-------")
             frame.update_pointmap(X_init, C_init)
             keyframes.append(frame)
             states.queue_global_optimization(len(keyframes) - 1)
             states.set_mode(Mode.TRACKING)
             states.set_frame(frame)
             i += 1
+            print("-------len------",len(keyframes))
             continue
 
         if mode == Mode.TRACKING:
+            print("-------debug mode : TRACKING-------")
             add_new_kf, match_info, try_reloc = tracker.track(frame)
+            #print("-------debug mode : TRACKING-------")
+            #print(add_new_kf,match_info,try_reloc)
             if try_reloc:
                 states.set_mode(Mode.RELOC)
             states.set_frame(frame)
 
         elif mode == Mode.RELOC:
             X, C = mast3r_inference_mono(model, frame)
+            print("----------reloc---------------")
             frame.update_pointmap(X, C)
             states.set_frame(frame)
             states.queue_reloc()

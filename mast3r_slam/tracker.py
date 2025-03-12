@@ -27,6 +27,7 @@ class FrameTracker:
 
     def track(self, frame: Frame):
         keyframe = self.keyframes.last_keyframe()
+        #print("----keyframe----")
 
         idx_f2k, valid_match_k, Xff, Cff, Qff, Xkf, Ckf, Qkf = mast3r_match_asymmetric(
             self.model, frame, keyframe, idx_i2j_init=self.idx_f2k
@@ -54,6 +55,7 @@ class FrameTracker:
         Xf, Xk, T_WCf, T_WCk, Cf, Ck, meas_k, valid_meas_k = self.get_points_poses(
             frame, keyframe, idx_f2k, img_size, use_calib, K
         )
+       # print("------------poses-----------")
 
         # Get valid
         # Use canonical confidence average
@@ -65,6 +67,8 @@ class FrameTracker:
         valid_kf = valid_match_k & valid_Q
 
         match_frac = valid_opt.sum() / valid_opt.numel()
+        #print("----------match frac--------------",match_frac)
+        #print(self.cfg["min_match_frac"])
         if match_frac < self.cfg["min_match_frac"]:
             print(f"Skipped frame {frame.frame_id}")
             return False, [], True
@@ -72,9 +76,11 @@ class FrameTracker:
         try:
             # Track
             if not use_calib:
+                #print("-------------opt_pose_ray----------")
                 T_WCf, T_CkCf = self.opt_pose_ray_dist_sim3(
                     Xf, Xk, T_WCf, T_WCk, Qk, valid_opt
                 )
+                
             else:
                 T_WCf, T_CkCf = self.opt_pose_calib_sim3(
                     Xf,
@@ -89,9 +95,9 @@ class FrameTracker:
                     img_size,
                 )
         except Exception as e:
-            print(f"Cholesky failed {frame.frame_id}")
+            print(f"Cholesky failed {frame.frame_id} {e}")
             return False, [], True
-
+       # print("-------------opt_pose_ray----------")
         frame.T_WC = T_WCf
 
         # Use pose to transform points to update keyframe
@@ -108,6 +114,7 @@ class FrameTracker:
         )
 
         new_kf = min(match_frac_k, unique_frac_f) < self.cfg["match_frac_thresh"]
+       # print("-------------new_kf----------")
 
         # Rest idx if new keyframe
         if new_kf:
@@ -171,17 +178,28 @@ class FrameTracker:
         return tau_j, cost
 
     def opt_pose_ray_dist_sim3(self, Xf, Xk, T_WCf, T_WCk, Qk, valid):
+        #print("opt_pose_ray_dist_sim3:Entered")
         last_error = 0
         sqrt_info_ray = 1 / self.cfg["sigma_ray"] * valid * torch.sqrt(Qk)
+        #print("opt_pose_ray_dist_sim3:sqrt_info_ray",sqrt_info_ray)
         sqrt_info_dist = 1 / self.cfg["sigma_dist"] * valid * torch.sqrt(Qk)
+        #print("opt_pose_ray_dist_sim3:sqrt_info_dist",sqrt_info_dist)
         sqrt_info = torch.cat((sqrt_info_ray.repeat(1, 3), sqrt_info_dist), dim=1)
+        #print("opt_pose_ray_dist_sim3:sqrt_info",sqrt_info)
 
         # Solving for relative pose without scale!
-        T_CkCf = T_WCk.inv() * T_WCf
+       # print("T_WCk",T_WCk.data)
+       # print("T_WCf",T_WCf.data)
+        #print("inverse T_WCk",torch.linalg.inv(T_WCk.data))
+        #T_WCk=T_WCk.to('cpu').inv().to('cuda')
+       # print("inverse T_WCk",T_WCk.data)
+        
+        T_CkCf = T_WCk * T_WCf
+       # print("relative pose",T_CkCf.data)
 
         # Precalculate distance and ray for obs k
         rd_k = point_to_ray_dist(Xk, jacobian=False)
-
+       # print("opt_pose_ray_dist_sim3:rd_k")
         old_cost = float("inf")
         for step in range(self.cfg["max_iters"]):
             Xf_Ck, dXf_Ck_dT_CkCf = act_Sim3(T_CkCf, Xf, jacobian=True)
@@ -210,6 +228,7 @@ class FrameTracker:
 
         # Assign new pose based on relative pose
         T_WCf = T_WCk * T_CkCf
+        print("new_pose")
 
         return T_WCf, T_CkCf
 
