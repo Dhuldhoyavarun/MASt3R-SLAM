@@ -10,11 +10,13 @@ import yaml
 from mast3r_slam.mast3r_utils import resize_img
 from mast3r_slam.config import config
 
+
 HAS_TORCHCODEC = True
 try:
     from torchcodec.decoders import VideoDecoder
 except Exception as e:
     HAS_TORCHCODEC = False
+
 
 
 class MonocularDataset(torch.utils.data.Dataset):
@@ -40,6 +42,7 @@ class MonocularDataset(torch.utils.data.Dataset):
         return self.timestamps[idx]
 
     def read_img(self, idx):
+        print(self.rgb_files)
         img = cv2.imread(self.rgb_files[idx])
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
@@ -243,6 +246,9 @@ class MP4Dataset(MonocularDataset):
             self.fps = self.cap.get(cv2.CAP_PROP_FPS)
             self.total_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
+            print("total_frame=",self.total_frames)
+
+
         self.stride = config["dataset"]["subsample"]
 
     def __len__(self):
@@ -270,7 +276,7 @@ class RGBFiles(MonocularDataset):
         super().__init__()
         self.use_calibration = False
         self.dataset_path = pathlib.Path(dataset_path)
-        self.rgb_files = natsorted(list((self.dataset_path).glob("*.png")))
+        self.rgb_files = natsorted(list((self.dataset_path).glob("*.jpg")))
         self.timestamps = np.arange(0, len(self.rgb_files)).astype(self.dtype) / 30.0
 
 
@@ -334,5 +340,6 @@ def load_dataset(dataset_path):
 
     ext = split_dataset_type[-1].split(".")[-1]
     if ext in ["mp4", "avi", "MOV", "mov"]:
+        print("--------------------------video------------------------")
         return MP4Dataset(dataset_path)
     return RGBFiles(dataset_path)
